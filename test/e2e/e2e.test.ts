@@ -9,7 +9,10 @@ import {
 import { RedisService } from "../../src/services/redisService.ts";
 import { HttpServer } from "../../src/http/server.ts";
 import axios, { type AxiosResponse } from "axios";
-import type {GetMessagesResponse, PostMessageResponse} from "../utils/types.ts";
+import type {
+  GetMessagesResponse,
+  PostMessageResponse,
+} from "../utils/types.ts";
 
 describe("Messages API – End-to-End Tests", () => {
   beforeAll(async () => {
@@ -18,7 +21,7 @@ describe("Messages API – End-to-End Tests", () => {
   });
 
   beforeEach(async () => {
-      // Reset Redis database before each test
+    // Reset Redis database before each test
     await RedisService.op().flushAll();
   });
 
