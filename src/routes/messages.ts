@@ -4,12 +4,30 @@ import { redis } from '../services/redisService'
 export const messageRoutes = new Hono()
 
 messageRoutes.post('/', async (c) => {
-    const body = await c.req.json()
-    await redis.lPush('messages', body.text)
-    return c.json({ ok: true })
+    try {
+        const body = await c.req.json().catch(() => null)
+
+        if (!body?.text || typeof body.text !== 'string') {
+            console.warn('[HTTP] Invalid payload received')
+            return c.json({ error: 'Invalid body: expected { text: string }' }, 400)
+        }
+
+        await redis.lpush('messages', body.text)
+
+        console.log('[HTTP] Message stored successfully')
+        return c.json({ ok: true })
+    } catch (err) {
+        console.error('[HTTP] Error in POST /messages:', err)
+        return c.json({ error: 'Internal server error' }, 500)
+    }
 })
 
 messageRoutes.get('/', async (c) => {
-    const msgs = await redis.lRange('messages', 0, 10)
-    return c.json(msgs)
+    try {
+        const messages = await redis.lrange('messages', 0, 9)
+        return c.json({ count: messages.length, messages })
+    } catch (err) {
+        console.error('[HTTP] Error in GET /messages:', err)
+        return c.json({ error: 'Internal server error' }, 500)
+    }
 })
