@@ -1,8 +1,8 @@
-import {Hono} from "hono";
-import {messageRoutes} from "./routes/messages.ts";
+import { Hono } from "hono";
+import { messageRoutes } from "./routes/messages.ts";
 
-const app = new Hono()
+const app = new Hono();
 
-app.route('/messages', messageRoutes)
+app.route("/messages", messageRoutes);
 
 export default app;
