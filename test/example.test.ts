@@ -1,8 +1,10 @@
 import { describe, test, expect } from "bun:test";
 
-describe("Example test case", () => {
-  test("Simple sum", async () => {
-    const sum = 2 + 2;
-    expect(sum).toBe(4);
+describe("Math utilities – basic operations", () => {
+  test("should correctly sum two positive integers", () => {
+    const a = 2;
+    const b = 2;
+    const result = a + b;
+    expect(result).toBe(4);
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, afterEach } from "bun:test";
+import { describe, test, expect, mock, afterEach } from "bun:test";
 import { RedisService } from "../../src/services/redisService";
 
 describe("RedisService - Unit tests", () => {
@@ -6,7 +6,7 @@ describe("RedisService - Unit tests", () => {
     (RedisService as any).client = null;
   });
 
-  it("should call lPush on the client", async () => {
+  test("should call lPush on the client", async () => {
     const fakeClient = {
       lPush: mock(async () => 1),
     };
@@ -19,7 +19,7 @@ describe("RedisService - Unit tests", () => {
     expect(fakeClient.lPush).toHaveBeenCalledWith("messages", "hello");
   });
 
-  it("should call lRange on the client", async () => {
+  test("should call lRange on the client", async () => {
     const fakeClient = {
       lRange: mock(async () => ["hi"]),
     };
@@ -33,7 +33,7 @@ describe("RedisService - Unit tests", () => {
     expect(result).toEqual(["hi"]);
   });
 
-  it("should return 15 elementos from 0 to 14", async () => {
+  test("should return 15 items from 0 to 14", async () => {
     const fakeClient = {
       lRange: mock(async () =>
         Array.from({ length: 15 }, (_, i) => `msg-${i}`),

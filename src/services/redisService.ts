@@ -4,9 +4,9 @@ export class RedisService {
   private static client: ReturnType<typeof createClient> | null = null;
 
   static async start() {
-    const c = createClient({ url: "redis://localhost:6379" });
-    await c.connect();
-    this.client = c;
+    const rc = createClient({ url: "redis://localhost:6379" });
+    await rc.connect();
+    this.client = rc;
     console.log("\x1b[32m 💾 Redis connected successfully \x1b[0m");
   }
 

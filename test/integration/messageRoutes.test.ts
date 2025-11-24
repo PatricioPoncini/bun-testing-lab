@@ -1,4 +1,4 @@
-import { describe, it, expect, afterAll, beforeAll } from "bun:test";
+import { describe, test, expect, afterAll, beforeAll } from "bun:test";
 import { messageRoutes } from "../../src/routes/messages";
 import { RedisService } from "../../src/services/redisService.ts";
 import type { ErrorResponse, GetMessagesResponse } from "../utils/types.ts";
@@ -14,7 +14,7 @@ describe("Message Routes – Integration Tests", () => {
   });
 
   describe("Success cases", () => {
-    it("GET /messages → returns an empty list when no messages exist", async () => {
+    test("GET /messages → returns an empty list when no messages exist", async () => {
       const req = new Request("http://localhost/messages");
       const res = await messageRoutes.request("/", req);
 
@@ -23,7 +23,7 @@ describe("Message Routes – Integration Tests", () => {
       expect(data.count).toBe(0);
     });
 
-    it("POST /messages → stores a new message successfully", async () => {
+    test("POST /messages → stores a new message successfully", async () => {
       const req = new Request("http://localhost/messages", {
         method: "POST",
         body: JSON.stringify({ text: "hi" }),
@@ -33,7 +33,7 @@ describe("Message Routes – Integration Tests", () => {
       expect(res.status).toBe(200);
     });
 
-    it("GET /messages → returns the previously stored message", async () => {
+    test("GET /messages → returns the previously stored message", async () => {
       const req = new Request("http://localhost/messages");
       const res = await messageRoutes.request("/", req);
 
@@ -42,7 +42,7 @@ describe("Message Routes – Integration Tests", () => {
       expect(data.count).toBe(1);
     });
 
-    it("POST /messages → returns only the first 10 messages after inserting 15", async () => {
+    test("POST /messages → returns only the first 10 messages after inserting 15", async () => {
       for (let i = 0; i < 15; i++) {
         const req = new Request("http://localhost/messages", {
           method: "POST",
@@ -68,7 +68,7 @@ describe("Message Routes – Integration Tests", () => {
   });
 
   describe("Error cases", () => {
-    it("POST /messages → returns 400 when body is missing", async () => {
+    test("POST /messages → returns 400 when body is missing", async () => {
       const req = new Request("http://localhost/messages", {
         method: "POST",
       });
@@ -80,7 +80,7 @@ describe("Message Routes – Integration Tests", () => {
       expect(data.error).toEqual("Invalid body: expected { text: string }");
     });
 
-    it("POST /messages → returns 400 when text is not a string", async () => {
+    test("POST /messages → returns 400 when text is not a string", async () => {
       const req = new Request("http://localhost/messages", {
         method: "POST",
         body: JSON.stringify({ text: 10 }),
