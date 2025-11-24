@@ -4,16 +4,12 @@ This repository contains a small backend server built with **Bun**, **Hono**, **
 
 The goal of this project is to provide clear, practical examples of **unit tests**, **integration tests**, and **end-to-end (E2E) tests** while experimenting with modern backend tools.
 
----
-
 ## `🚀 Tech Stack`
 
 - **Bun** – Ultra-fast JavaScript runtime used to run the server and tests
 - **Hono** – Lightweight and high-performance web framework
 - **Redis** – In-memory data store used for caching and message handling
 - **TypeScript** – Static typing to improve maintainability and code quality
-
----
 
 ## `🎯 Purpose`
 
@@ -23,8 +19,6 @@ This project is intended as a **testing playground**, where you can:
 - Build **integration tests** that interact with Redis and other services
 - Run **end-to-end tests** that exercise the entire API
 - Experiment with backend techniques using Bun and Hono
-
----
 
 ## `▶️ Running the server`
 
@@ -39,6 +33,8 @@ bun test
 ```
 
 Tests will be progressively added across all categories (unit, integration, and E2E).
+
+---
 
 ### `📝 Notes`
 
