@@ -1,15 +1,7 @@
 import { describe, it, expect, afterAll, beforeAll } from "bun:test";
 import { messageRoutes } from "../../src/routes/messages";
 import { RedisService } from "../../src/services/redisService.ts";
-
-interface GetMessagesResponse {
-  count: number;
-  messages: string[];
-}
-
-interface ErrorResponse {
-  error: string;
-}
+import type {ErrorResponse, GetMessagesResponse} from "../utils/types.ts";
 
 describe("Message Routes – Integration Tests", () => {
   beforeAll(async () => {
