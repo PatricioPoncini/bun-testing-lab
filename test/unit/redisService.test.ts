@@ -1,33 +1,36 @@
-import { describe, it, expect, mock } from "bun:test"
+import { describe, it, expect, mock, afterEach } from "bun:test"
 import { RedisService } from "../../src/services/redisService"
-import type {RedisClientType} from "redis";
 
 describe("RedisService - unit", () => {
+    afterEach(() => {
+        (RedisService as any).client = null
+    })
+
     it("should call lPush on the client", async () => {
         const fakeClient = {
-            lPush: mock(async () => 1)
-        }
+                lPush: mock(async () => 1)
+            }
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+        ;(RedisService as any).client = fakeClient
 
-        await redis.lpush("messages", "hello")
+        await RedisService.lpush("messages", "hello")
 
         expect(fakeClient.lPush).toHaveBeenCalled()
         expect(fakeClient.lPush).toHaveBeenCalledWith("messages", "hello")
     })
 
-    it("should call lrange on the client", async () => {
+    it("should call lRange on the client", async () => {
         const fakeClient = {
-            lRange: mock(async () => ["hi"])
-        }
+                lRange: mock(async () => ["hi"])
+            }
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+        ;(RedisService as any).client = fakeClient
 
-        const range = await redis.lrange("messages", 0, 1)
+        const result = await RedisService.lrange("messages", 0, 1)
 
         expect(fakeClient.lRange).toHaveBeenCalled()
         expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 1)
-        expect(range).toEqual(["hi"])
+        expect(result).toEqual(["hi"])
     })
 
     it("should return 15 elementos from 0 to 14", async () => {
@@ -35,9 +38,9 @@ describe("RedisService - unit", () => {
             lRange: mock(async () => Array.from({ length: 15 }, (_, i) => `msg-${i}`))
         }
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+        ;(RedisService as any).client = fakeClient
 
-        const range = await redis.lrange("messages", 0, 14)
+        const range = await RedisService.lrange("messages", 0, 14)
 
         expect(fakeClient.lRange).toHaveBeenCalled()
         expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 14)

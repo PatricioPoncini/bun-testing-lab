@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, beforeAll } from "bun:test"
+import { describe, it, expect, afterAll, beforeAll } from "bun:test"
 import { messageRoutes } from "../../src/routes/messages"
-import { redisClient } from "../../src/services/redisService"
+import {RedisService} from "../../src/services/redisService.ts";
 
 interface GetMessagesResponse {
     count: number;
@@ -13,7 +13,12 @@ interface ErrorResponse {
 
 describe("Message Routes – Integration Tests", () => {
     beforeAll(async () => {
-        await redisClient.del("messages")
+        await RedisService.start();
+        await RedisService.op().del("messages");
+    })
+
+    afterAll(async () => {
+        await RedisService.stop();
     })
 
     describe("Success cases", () => {

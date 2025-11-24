@@ -12,7 +12,7 @@ messageRoutes.post('/', async (c) => {
             return c.json({ error: 'Invalid body: expected { text: string }' }, 400)
         }
 
-        await RedisService.op().lpush('messages', body.text)
+        await RedisService.lpush('messages', body.text)
 
         console.log('[HTTP] Message stored successfully')
         return c.json({ ok: true })
@@ -24,7 +24,7 @@ messageRoutes.post('/', async (c) => {
 
 messageRoutes.get('/', async (c) => {
     try {
-        const messages = await RedisService.op().lrange('messages', 0, 9)
+        const messages = await RedisService.lrange('messages', 0, 9)
         return c.json({ count: messages.length, messages })
     } catch (err) {
         console.error('[HTTP] Error in GET /messages:', err)

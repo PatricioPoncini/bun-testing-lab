@@ -18,7 +18,10 @@ export class RedisService {
     }
 
     static op() {
-        return this.client;
+        if (!this.client) {
+            throw new Error("RedisService not initialized")
+        }
+        return this.client
     }
 
     static lpush(key: string, value: string) {
