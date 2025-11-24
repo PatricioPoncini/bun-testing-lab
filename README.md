@@ -38,7 +38,7 @@ Both RedisService and HttpServer are implemented as singletons:
   Example: Testing `RedisService.lpush` with a mocked Redis client.
 
 ```ts
-test("should call lPush on the client", async () => {
+test("Should call lPush on the client", async () => {
   const fakeClient = {
     lPush: mock(async () => 1),
   };
