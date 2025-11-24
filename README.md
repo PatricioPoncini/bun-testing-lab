@@ -21,7 +21,7 @@ This project is intended as a **testing playground**, where you can:
 - Experiment with backend design patterns like singleton services
 - Learn modern testing patterns in a minimal, modular codebase
 
-## `🔹 Singleton services`
+## `🛠️ Singleton services`
 
 Both RedisService and HttpServer are implemented as singletons:
 
