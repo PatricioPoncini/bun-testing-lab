@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bun --hot run index.ts",
     "start": "bun index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "bun build index.ts --outdir dist --minify --target bun"
   },
   "devDependencies": {
     "@types/bun": "latest",
