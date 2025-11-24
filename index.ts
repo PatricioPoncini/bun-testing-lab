@@ -1,7 +1,6 @@
 import { HttpServer } from "./src/http/server.ts";
 import { RedisService } from "./src/services/redisService.ts";
 
-// TODO: Esto podria pasar a una clase Application que sea general para todos los servicios
 async function main() {
     await RedisService.start();
     await HttpServer.start();
