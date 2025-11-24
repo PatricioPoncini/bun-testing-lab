@@ -1,7 +1,7 @@
 import { describe, it, expect, mock, afterEach } from "bun:test";
 import { RedisService } from "../../src/services/redisService";
 
-describe("RedisService - unit", () => {
+describe("RedisService - Unit tests", () => {
   afterEach(() => {
     (RedisService as any).client = null;
   });
