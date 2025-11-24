@@ -1,44 +1,34 @@
-import { createClient } from 'redis'
-import type { RedisLike } from "../types/redisTypes.ts";
+import { createClient } from "redis";
 
 export class RedisService {
-    constructor(private client: RedisLike) {}
+  private static client: ReturnType<typeof createClient> | null = null;
 
-    async lpush(key: string, value: string) {
-        console.log(`[Redis] LPUSH -> key="${key}", value="${value}"`);
-        try {
-            const result = await this.client.lPush(key, value);
-            console.log(`[Redis] LPUSH result ->`, result);
-            return result;
-        } catch (err) {
-            console.error(`[Redis] LPUSH error:`, err);
-            throw err;
-        }
-    }
+  static async start() {
+    const c = createClient({ url: "redis://localhost:6379" });
+    await c.connect();
+    this.client = c;
+    console.log("\x1b[32m 💾 Redis connected successfully \x1b[0m");
+  }
 
-    async lrange(key: string, start: number, stop: number) {
-        console.log(`[Redis] LRANGE -> key="${key}", start=${start}, stop=${stop}`);
-        try {
-            const result = await this.client.lRange(key, start, stop);
-            console.log(`[Redis] LRANGE result ->`, result);
-            return result;
-        } catch (err) {
-            console.error(`[Redis] LRANGE error:`, err);
-            throw err;
-        }
+  static async stop() {
+    if (this.client?.isOpen) {
+      await this.client.quit();
+      console.log("\x1b[31m 🔴 Redis stopped \x1b[0m");
     }
+  }
+
+  static op() {
+    if (!this.client) {
+      throw new Error("RedisService not initialized");
+    }
+    return this.client;
+  }
+
+  static lpush(key: string, value: string) {
+    return this.client!.lPush(key, value);
+  }
+
+  static lrange(key: string, start: number, stop: number) {
+    return this.client!.lRange(key, start, stop);
+  }
 }
-
-export const redisClient = createClient({
-    url: 'redis://localhost:6379' // TODO: Podría pasarse esto a un .env
-})
-
-redisClient.on('error', (err) => {
-    console.error('[Redis] Connection error:', err);
-});
-
-await redisClient.connect();
-
-console.log('[Redis] Client connected successfully.');
-
-export const redis = new RedisService(redisClient);

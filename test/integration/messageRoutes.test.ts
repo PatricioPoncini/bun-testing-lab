@@ -1,96 +1,104 @@
-import { describe, it, expect, beforeEach, beforeAll } from "bun:test"
-import { messageRoutes } from "../../src/routes/messages"
-import { redisClient } from "../../src/services/redisService"
+import { describe, it, expect, afterAll, beforeAll } from "bun:test";
+import { messageRoutes } from "../../src/routes/messages";
+import { RedisService } from "../../src/services/redisService.ts";
 
 interface GetMessagesResponse {
-    count: number;
-    messages: string[];
+  count: number;
+  messages: string[];
 }
 
 interface ErrorResponse {
-    error: string;
+  error: string;
 }
 
 describe("Message Routes – Integration Tests", () => {
-    beforeAll(async () => {
-        await redisClient.del("messages")
-    })
+  beforeAll(async () => {
+    await RedisService.start();
+    await RedisService.op().del("messages");
+  });
 
-    describe("Success cases", () => {
-        it("GET /messages → returns an empty list when no messages exist", async () => {
-            const req = new Request("http://localhost/messages")
-            const res = await messageRoutes.request("/", req)
+  afterAll(async () => {
+    await RedisService.stop();
+  });
 
-            const data = await res.json() as GetMessagesResponse
-            expect(data.messages.length).toBe(0)
-            expect(data.count).toBe(0)
-        })
+  describe("Success cases", () => {
+    it("GET /messages → returns an empty list when no messages exist", async () => {
+      const req = new Request("http://localhost/messages");
+      const res = await messageRoutes.request("/", req);
 
-        it("POST /messages → stores a new message successfully", async () => {
-            const req = new Request("http://localhost/messages", {
-                method: "POST",
-                body: JSON.stringify({ text: "hi" })
-            })
+      const data = (await res.json()) as GetMessagesResponse;
+      expect(data.messages.length).toBe(0);
+      expect(data.count).toBe(0);
+    });
 
-            const res = await messageRoutes.request("/", req)
-            expect(res.status).toBe(200)
-        })
+    it("POST /messages → stores a new message successfully", async () => {
+      const req = new Request("http://localhost/messages", {
+        method: "POST",
+        body: JSON.stringify({ text: "hi" }),
+      });
 
-        it("GET /messages → returns the previously stored message", async () => {
-            const req = new Request("http://localhost/messages")
-            const res = await messageRoutes.request("/", req)
+      const res = await messageRoutes.request("/", req);
+      expect(res.status).toBe(200);
+    });
 
-            const data = await res.json() as GetMessagesResponse
-            expect(data.messages.length).toBeGreaterThan(0)
-            expect(data.count).toBe(1)
-        })
+    it("GET /messages → returns the previously stored message", async () => {
+      const req = new Request("http://localhost/messages");
+      const res = await messageRoutes.request("/", req);
 
-        it("POST /messages → returns only the first 10 messages after inserting 15", async () => {
-            for (let i = 0; i < 15; i++) {
-                const req = new Request("http://localhost/messages", {
-                    method: "POST",
-                    body: JSON.stringify({ text: `msg-${i}` })
-                })
+      const data = (await res.json()) as GetMessagesResponse;
+      expect(data.messages.length).toBeGreaterThan(0);
+      expect(data.count).toBe(1);
+    });
 
-                const res = await messageRoutes.request("/", req)
-                expect(res.status).toBe(200)
-            }
+    it("POST /messages → returns only the first 10 messages after inserting 15", async () => {
+      for (let i = 0; i < 15; i++) {
+        const req = new Request("http://localhost/messages", {
+          method: "POST",
+          body: JSON.stringify({ text: `msg-${i}` }),
+        });
 
-            const getReq = new Request("http://localhost/messages")
-            const getRes = await messageRoutes.request("/", getReq)
+        const res = await messageRoutes.request("/", req);
+        expect(res.status).toBe(200);
+      }
 
-            const data = await getRes.json() as { count: number; messages: string[] }
+      const getReq = new Request("http://localhost/messages");
+      const getRes = await messageRoutes.request("/", getReq);
 
-            expect(getRes.status).toBe(200)
-            expect(data.messages.length).toBe(10)
-            expect(data.count).toBe(10)
-        })
-    })
+      const data = (await getRes.json()) as {
+        count: number;
+        messages: string[];
+      };
 
-    describe("Error cases", () => {
-        it("POST /messages → returns 400 when body is missing", async () => {
-            const req = new Request("http://localhost/messages", {
-                method: "POST",
-            })
+      expect(getRes.status).toBe(200);
+      expect(data.messages.length).toBe(10);
+      expect(data.count).toBe(10);
+    });
+  });
 
-            const res = await messageRoutes.request("/", req)
-            const data = await res.json() as ErrorResponse
+  describe("Error cases", () => {
+    it("POST /messages → returns 400 when body is missing", async () => {
+      const req = new Request("http://localhost/messages", {
+        method: "POST",
+      });
 
-            expect(res.status).toBe(400)
-            expect(data.error).toEqual("Invalid body: expected { text: string }")
-        })
+      const res = await messageRoutes.request("/", req);
+      const data = (await res.json()) as ErrorResponse;
 
-        it("POST /messages → returns 400 when text is not a string", async () => {
-            const req = new Request("http://localhost/messages", {
-                method: "POST",
-                body: JSON.stringify({ text: 10 })
-            })
+      expect(res.status).toBe(400);
+      expect(data.error).toEqual("Invalid body: expected { text: string }");
+    });
 
-            const res = await messageRoutes.request("/", req)
-            const data = await res.json() as ErrorResponse
+    it("POST /messages → returns 400 when text is not a string", async () => {
+      const req = new Request("http://localhost/messages", {
+        method: "POST",
+        body: JSON.stringify({ text: 10 }),
+      });
 
-            expect(res.status).toBe(400)
-            expect(data.error).toEqual("Invalid body: expected { text: string }")
-        })
-    })
-})
+      const res = await messageRoutes.request("/", req);
+      const data = (await res.json()) as ErrorResponse;
+
+      expect(res.status).toBe(400);
+      expect(data.error).toEqual("Invalid body: expected { text: string }");
+    });
+  });
+});

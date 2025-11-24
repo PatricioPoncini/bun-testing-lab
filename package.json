@@ -7,7 +7,8 @@
     "dev": "bun --hot run index.ts",
     "start": "bun index.ts",
     "test": "bun test",
-    "build": "bun build index.ts --outdir dist --minify --target bun"
+    "build": "bun build index.ts --outdir dist --minify --target bun",
+    "format": "npx prettier --write ."
   },
   "devDependencies": {
     "@types/bun": "latest",

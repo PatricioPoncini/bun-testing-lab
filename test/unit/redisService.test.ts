@@ -1,46 +1,51 @@
-import { describe, it, expect, mock } from "bun:test"
-import { RedisService } from "../../src/services/redisService"
-import type {RedisClientType} from "redis";
+import { describe, it, expect, mock, afterEach } from "bun:test";
+import { RedisService } from "../../src/services/redisService";
 
 describe("RedisService - unit", () => {
-    it("should call lPush on the client", async () => {
-        const fakeClient = {
-            lPush: mock(async () => 1)
-        }
+  afterEach(() => {
+    (RedisService as any).client = null;
+  });
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+  it("should call lPush on the client", async () => {
+    const fakeClient = {
+      lPush: mock(async () => 1),
+    };
 
-        await redis.lpush("messages", "hello")
+    (RedisService as any).client = fakeClient;
 
-        expect(fakeClient.lPush).toHaveBeenCalled()
-        expect(fakeClient.lPush).toHaveBeenCalledWith("messages", "hello")
-    })
+    await RedisService.lpush("messages", "hello");
 
-    it("should call lrange on the client", async () => {
-        const fakeClient = {
-            lRange: mock(async () => ["hi"])
-        }
+    expect(fakeClient.lPush).toHaveBeenCalled();
+    expect(fakeClient.lPush).toHaveBeenCalledWith("messages", "hello");
+  });
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+  it("should call lRange on the client", async () => {
+    const fakeClient = {
+      lRange: mock(async () => ["hi"]),
+    };
 
-        const range = await redis.lrange("messages", 0, 1)
+    (RedisService as any).client = fakeClient;
 
-        expect(fakeClient.lRange).toHaveBeenCalled()
-        expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 1)
-        expect(range).toEqual(["hi"])
-    })
+    const result = await RedisService.lrange("messages", 0, 1);
 
-    it("should return 15 elementos from 0 to 14", async () => {
-        const fakeClient = {
-            lRange: mock(async () => Array.from({ length: 15 }, (_, i) => `msg-${i}`))
-        }
+    expect(fakeClient.lRange).toHaveBeenCalled();
+    expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 1);
+    expect(result).toEqual(["hi"]);
+  });
 
-        const redis = new RedisService(fakeClient as unknown as RedisClientType)
+  it("should return 15 elementos from 0 to 14", async () => {
+    const fakeClient = {
+      lRange: mock(async () =>
+        Array.from({ length: 15 }, (_, i) => `msg-${i}`),
+      ),
+    };
 
-        const range = await redis.lrange("messages", 0, 14)
+    (RedisService as any).client = fakeClient;
 
-        expect(fakeClient.lRange).toHaveBeenCalled()
-        expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 14)
-        expect(range).toHaveLength(15)
-    })
-})
+    const range = await RedisService.lrange("messages", 0, 14);
+
+    expect(fakeClient.lRange).toHaveBeenCalled();
+    expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 14);
+    expect(range).toHaveLength(15);
+  });
+});

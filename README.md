@@ -1,6 +1,6 @@
 # `Testing Lab`
 
-This repository contains a small backend server built with **Bun**, **Hono**, **Redis**, and **TypeScript**, designed as a playground for exploring different testing strategies.  
+This repository contains a small backend server built with **Bun**, **Hono**, **Redis**, and **TypeScript**, designed as a playground for exploring different testing strategies.
 
 The goal of this project is to provide clear, practical examples of **unit tests**, **integration tests**, and **end-to-end (E2E) tests** while experimenting with modern backend tools.
 
@@ -25,9 +25,11 @@ This project is intended as a **testing playground**, where you can:
 ```sh
 bun run dev
 ```
+
 The server will automatically reload when files change.
 
 ## `🧪 Running tests`
+
 ```shell
 bun test
 ```
