@@ -3,8 +3,8 @@ import {
   test,
   expect,
   beforeAll,
-  afterAll,
   beforeEach,
+  afterAll,
 } from "bun:test";
 import { RedisService } from "../../src/services/redisService.ts";
 import { HttpServer } from "../../src/http/server.ts";
@@ -20,14 +20,14 @@ describe("Messages API – End-to-End Tests", () => {
     await HttpServer.start();
   });
 
-  beforeEach(async () => {
-    // Reset Redis database before each test
-    await RedisService.op().flushAll();
-  });
-
   afterAll(async () => {
     await RedisService.stop();
     await HttpServer.stop();
+  });
+
+  beforeEach(async () => {
+    // Reset Redis database before each test
+    await RedisService.op().flushAll();
   });
 
   describe("GET /messages endpoint", async () => {
@@ -124,7 +124,7 @@ describe("Messages API – End-to-End Tests", () => {
       );
     });
 
-    test("should handle multiple POST requests at the same time without losing messages", async () => {
+    test("Should handle multiple POST requests at the same time without losing messages", async () => {
       const messages = ["msg1", "msg2", "msg3", "msg4", "msg5"];
 
       await Promise.all(
