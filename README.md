@@ -97,23 +97,18 @@ test("Should save a valid message and then retrieve it", async () => {
 });
 ```
 
-## `▶️ Running the server`
+## `📦 Available Commands`
 
-```sh
-bun run dev
-```
+Here is a list of all available commands defined in the `package.json`, along with what each one does:
 
-The server will automatically reload when files change.
-
-## `🧪 Running tests`
-
-```shell
-bun test
-```
-
-- **Unit tests**: Test logic in isolation
-- **Integration tests**: Test services and external dependencies (Redis)
-- **E2E tests**: Test full API behavior
+| Command              | Description |
+|----------------------|-------------|
+| **`bun run dev`**    | Runs the server in development mode with hot-reload enabled. |
+| **`bun start`**      | Starts the server normally (without hot-reload). |
+| **`bun test`**       | Runs all tests (unit, integration, and E2E). |
+| **`bun run build`**  | Builds the project into the `dist/` folder, minified and optimized for Bun. |
+| **`bun run format`** | Formats all files in the project using Prettier. |
+| **`bun coverage`**   | Runs the test suite and generates a coverage report. |
 
 ---
 

@@ -1,7 +1,8 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll, vi } from "bun:test";
 import { messageRoutes } from "../../src/routes/messages";
 import { RedisService } from "../../src/services/redisService.ts";
 import type { ErrorResponse, GetMessagesResponse } from "../utils/types.ts";
+import app from "../../src/app";
 
 describe("Message Routes – Integration Tests", () => {
   beforeAll(async () => {
@@ -91,6 +92,40 @@ describe("Message Routes – Integration Tests", () => {
 
       expect(res.status).toBe(400);
       expect(data.error).toEqual("Invalid body: expected { text: string }");
+    });
+
+    test("POST /messages → returns 500 if RedisService.lpush throws an error", async () => {
+      const spy = vi
+        .spyOn(RedisService, "lpush")
+        .mockRejectedValue(new Error("Redis failed"));
+
+      const req = new Request("http://localhost/messages", {
+        method: "POST",
+        body: JSON.stringify({ text: "hello" }),
+      });
+
+      const res = await messageRoutes.request("/", req);
+      const data = (await res.json()) as ErrorResponse;
+
+      expect(res.status).toBe(500);
+      expect(data.error).toBe("Internal server error");
+
+      spy.mockRestore();
+    });
+
+    test("GET /messages → returns 500 if RedisService.lrange throws an error", async () => {
+      const spy = vi
+        .spyOn(RedisService, "lrange")
+        .mockRejectedValue(new Error("Redis failed"));
+
+      const req = new Request("http://localhost/messages");
+      const res = await messageRoutes.request("/", req);
+      const data = (await res.json()) as ErrorResponse;
+
+      expect(res.status).toBe(500);
+      expect(data.error).toBe("Internal server error");
+
+      spy.mockRestore();
     });
   });
 });

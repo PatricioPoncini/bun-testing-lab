@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, afterEach } from "bun:test";
+import { describe, test, expect, mock, afterEach, vi } from "bun:test";
 import { RedisService } from "../../src/services/redisService";
 
 describe("RedisService - Unit tests", () => {
@@ -47,5 +47,17 @@ describe("RedisService - Unit tests", () => {
     expect(fakeClient.lRange).toHaveBeenCalled();
     expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 14);
     expect(range).toHaveLength(15);
+  });
+
+  test("op() throws when client is not initialized", () => {
+    (RedisService as any).client = null;
+
+    expect(() => RedisService.op()).toThrow();
+  });
+
+  test("stop() should not fail when client is null", async () => {
+    (RedisService as any).client = null;
+
+    expect(() => RedisService.stop()).not.toThrow();
   });
 });

@@ -8,16 +8,13 @@ messageRoutes.post("/", async (c) => {
     const body = await c.req.json().catch(() => null);
 
     if (!body?.text || typeof body.text !== "string") {
-      console.warn("[HTTP] Invalid payload received");
       return c.json({ error: "Invalid body: expected { text: string }" }, 400);
     }
 
     await RedisService.lpush("messages", body.text);
 
-    console.log("[HTTP] Message stored successfully");
     return c.json({ ok: true });
   } catch (err) {
-    console.error("[HTTP] Error in POST /messages:", err);
     return c.json({ error: "Internal server error" }, 500);
   }
 });
@@ -27,7 +24,6 @@ messageRoutes.get("/", async (c) => {
     const messages = await RedisService.lrange("messages", 0, 9);
     return c.json({ count: messages.length, messages });
   } catch (err) {
-    console.error("[HTTP] Error in GET /messages:", err);
     return c.json({ error: "Internal server error" }, 500);
   }
 });
