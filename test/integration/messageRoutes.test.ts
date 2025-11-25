@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { messageRoutes } from "../../src/routes/messages";
 import { RedisService } from "../../src/services/redisService.ts";
 import type { ErrorResponse, GetMessagesResponse } from "../utils/types.ts";
@@ -7,6 +7,10 @@ describe("Message Routes – Integration Tests", () => {
   beforeAll(async () => {
     await RedisService.start();
     await RedisService.op().del("messages");
+  });
+
+  afterAll(async () => {
+    await RedisService.stop();
   });
 
   describe("Success cases", () => {

@@ -4,6 +4,7 @@ import {
   expect,
   beforeAll,
   beforeEach,
+  afterAll,
 } from "bun:test";
 import { RedisService } from "../../src/services/redisService.ts";
 import { HttpServer } from "../../src/http/server.ts";
@@ -17,6 +18,11 @@ describe("Messages API – End-to-End Tests", () => {
   beforeAll(async () => {
     await RedisService.start();
     await HttpServer.start();
+  });
+
+  afterAll(async () => {
+    await RedisService.stop();
+    await HttpServer.stop();
   });
 
   beforeEach(async () => {
