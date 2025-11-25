@@ -101,14 +101,14 @@ test("Should save a valid message and then retrieve it", async () => {
 
 Here is a list of all available commands defined in the `package.json`, along with what each one does:
 
-| Command              | Description |
-|----------------------|-------------|
-| **`bun run dev`**    | Runs the server in development mode with hot-reload enabled. |
-| **`bun start`**      | Starts the server normally (without hot-reload). |
-| **`bun test`**       | Runs all tests (unit, integration, and E2E). |
+| Command              | Description                                                                 |
+| -------------------- | --------------------------------------------------------------------------- |
+| **`bun run dev`**    | Runs the server in development mode with hot-reload enabled.                |
+| **`bun start`**      | Starts the server normally (without hot-reload).                            |
+| **`bun test`**       | Runs all tests (unit, integration, and E2E).                                |
 | **`bun run build`**  | Builds the project into the `dist/` folder, minified and optimized for Bun. |
-| **`bun run format`** | Formats all files in the project using Prettier. |
-| **`bun coverage`**   | Runs the test suite and generates a coverage report. |
+| **`bun run format`** | Formats all files in the project using Prettier.                            |
+| **`bun coverage`**   | Runs the test suite and generates a coverage report.                        |
 
 ---
 
