@@ -1,11 +1,19 @@
-import { describe, test, expect, beforeAll, afterAll, vi } from "bun:test";
+import {
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+  vi,
+  beforeEach,
+} from "bun:test";
 import { messageRoutes } from "../../src/routes/messages";
 import { RedisService } from "../../src/services/redisService.ts";
 import type { ErrorResponse, GetMessagesResponse } from "../utils/types.ts";
 import app from "../../src/app";
 
 describe("Message Routes – Integration Tests", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await RedisService.start();
     await RedisService.op().del("messages");
   });
@@ -22,6 +30,9 @@ describe("Message Routes – Integration Tests", () => {
       const data = (await res.json()) as GetMessagesResponse;
       expect(data.messages.length).toBe(0);
       expect(data.count).toBe(0);
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(0);
     });
 
     test("POST /messages → stores a new message successfully", async () => {
@@ -32,15 +43,29 @@ describe("Message Routes – Integration Tests", () => {
 
       const res = await messageRoutes.request("/", req);
       expect(res.status).toBe(200);
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(1);
     });
 
     test("GET /messages → returns the previously stored message", async () => {
-      const req = new Request("http://localhost/messages");
-      const res = await messageRoutes.request("/", req);
+      const postReq = new Request("http://localhost/messages", {
+        method: "POST",
+        body: JSON.stringify({ text: "hi" }),
+      });
 
-      const data = (await res.json()) as GetMessagesResponse;
+      const postRest = await messageRoutes.request("/", postReq);
+      expect(postRest.status).toBe(200);
+
+      const getReq = new Request("http://localhost/messages");
+      const getRes = await messageRoutes.request("/", getReq);
+
+      const data = (await getRes.json()) as GetMessagesResponse;
       expect(data.messages.length).toBeGreaterThan(0);
       expect(data.count).toBe(1);
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(1);
     });
 
     test("POST /messages → returns only the first 10 messages after inserting 15", async () => {
@@ -65,6 +90,9 @@ describe("Message Routes – Integration Tests", () => {
       expect(getRes.status).toBe(200);
       expect(data.messages.length).toBe(10);
       expect(data.count).toBe(10);
+
+      const count = await RedisService.lrange("messages", 0, 100);
+      expect(count.length).toBe(15);
     });
   });
 
@@ -79,6 +107,9 @@ describe("Message Routes – Integration Tests", () => {
 
       expect(res.status).toBe(400);
       expect(data.error).toEqual("Invalid body: expected { text: string }");
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(0);
     });
 
     test("POST /messages → returns 400 when text is not a string", async () => {
@@ -92,6 +123,9 @@ describe("Message Routes – Integration Tests", () => {
 
       expect(res.status).toBe(400);
       expect(data.error).toEqual("Invalid body: expected { text: string }");
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(0);
     });
 
     test("POST /messages → returns 500 if RedisService.lpush throws an error", async () => {
@@ -111,6 +145,9 @@ describe("Message Routes – Integration Tests", () => {
       expect(data.error).toBe("Internal server error");
 
       spy.mockRestore();
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(0);
     });
 
     test("GET /messages → returns 500 if RedisService.lrange throws an error", async () => {
@@ -126,6 +163,9 @@ describe("Message Routes – Integration Tests", () => {
       expect(data.error).toBe("Internal server error");
 
       spy.mockRestore();
+
+      const count = await RedisService.lrange("messages", 0, 10);
+      expect(count.length).toBe(0);
     });
   });
 });
