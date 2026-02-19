@@ -1,63 +1,82 @@
-import { describe, test, expect, mock, afterEach, vi } from "bun:test";
-import { RedisService } from "../../src/services/redisService";
+import {describe, test, expect, mock, spyOn, afterEach, beforeEach, type Mock, vi} from "bun:test";
+import {type IRedisClient, RedisService} from "../../src/services/redisService";
 
 describe("RedisService - Unit tests", () => {
+  const fakeClient: IRedisClient = {
+    lPush: async () => 1,
+    lRange: async () => ["msg-mock"],
+    del: async () => 1,
+    ping: async () => "PONG",
+    connect: async () => {},
+    quit: async () => {},
+    isOpen: true,
+  };
+
+  let opSpy: Mock<() => IRedisClient>;
+
+  beforeEach(() => {
+    opSpy = spyOn(RedisService, "op").mockReturnValue(fakeClient);
+  });
+
   afterEach(() => {
-    (RedisService as any).client = null;
+    opSpy.mockRestore();
   });
 
   test("Should call lPush on the client", async () => {
-    const fakeClient = {
-      lPush: mock(async () => 1),
-    };
-
-    (RedisService as any).client = fakeClient;
+    const lPushSpy = spyOn(fakeClient, "lPush");
 
     await RedisService.lpush("messages", "hello");
 
-    expect(fakeClient.lPush).toHaveBeenCalled();
-    expect(fakeClient.lPush).toHaveBeenCalledWith("messages", "hello");
+    expect(lPushSpy).toHaveBeenCalledWith("messages", "hello");
   });
 
-  test("Should call lRange on the client", async () => {
-    const fakeClient = {
-      lRange: mock(async () => ["hi"]),
-    };
+  test("Should return mocked items from lRange", async () => {
+    const range = await RedisService.lrange("messages", 0, 1);
 
-    (RedisService as any).client = fakeClient;
-
-    const result = await RedisService.lrange("messages", 0, 1);
-
-    expect(fakeClient.lRange).toHaveBeenCalled();
-    expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 1);
-    expect(result).toEqual(["hi"]);
+    expect(range).toEqual(["msg-mock"]);
+    expect(range).toHaveLength(1);
   });
 
-  test("Should return 15 items from 0 to 14", async () => {
-    const fakeClient = {
-      lRange: mock(async () =>
-        Array.from({ length: 15 }, (_, i) => `msg-${i}`),
-      ),
-    };
+  test("Should propagate errors when lPush fails", async () => {
+    const errorSpy = spyOn(fakeClient, "lPush").mockRejectedValue(new Error("Redis Connection Lost"));
 
-    (RedisService as any).client = fakeClient;
+    expect(RedisService.lpush("key", "val")).rejects.toThrow("Redis Connection Lost");
 
-    const range = await RedisService.lrange("messages", 0, 14);
-
-    expect(fakeClient.lRange).toHaveBeenCalled();
-    expect(fakeClient.lRange).toHaveBeenCalledWith("messages", 0, 14);
-    expect(range).toHaveLength(15);
+    errorSpy.mockRestore();
   });
 
-  test("op() throws when client is not initialized", () => {
-    (RedisService as any).client = null;
+  test("stop() should NOT call quit if the client is already closed", async () => {
+    const quitSpy = spyOn(fakeClient, "quit");
+    fakeClient.isOpen = false;
 
-    expect(() => RedisService.op()).toThrow();
+    await RedisService.stop();
+
+    expect(quitSpy).not.toHaveBeenCalled();
+    fakeClient.isOpen = true;
   });
 
-  test("stop() should not fail when client is null", async () => {
-    (RedisService as any).client = null;
+  test("op() should throw an error if client is null", () => {
+    opSpy.mockRestore();
 
-    expect(() => RedisService.stop()).not.toThrow();
+    expect(() => RedisService.op()).toThrow("RedisService not initialized");
+
+    opSpy = spyOn(RedisService, "op").mockReturnValue(fakeClient);
+  });
+
+  test("Should call del with correct parameters", async () => {
+    const delSpy = spyOn(fakeClient, "del");
+
+    await RedisService.op().del("my-key");
+
+    expect(delSpy).toHaveBeenCalledWith("my-key");
+  });
+
+  test("Should return PONG when calling ping", async () => {
+    const pingSpy = spyOn(fakeClient, "ping").mockResolvedValue("PONG");
+
+    const result = await RedisService.op().ping();
+
+    expect(result).toBe("PONG");
+    expect(pingSpy).toHaveBeenCalled();
   });
 });

@@ -1,12 +1,22 @@
 import { createClient } from "redis";
 
+export interface IRedisClient {
+  lPush(key: string, value: string): Promise<number>;
+  lRange(key: string, start: number, stop: number): Promise<string[]>;
+  del(key: string | string[]): Promise<number>;
+  ping(): Promise<string>;
+  connect(): Promise<any>;
+  quit(): Promise<any>;
+  isOpen: boolean;
+}
+
 export class RedisService {
-  private static client: ReturnType<typeof createClient> | null = null;
+  private static client: IRedisClient | null = null;
 
   static async start() {
     const rc = createClient({ url: "redis://localhost:6379" });
     await rc.connect();
-    this.client = rc;
+    this.client = rc as unknown as IRedisClient;
     console.log("\x1b[32m 💾 Redis connected successfully \x1b[0m");
   }
 
@@ -25,10 +35,10 @@ export class RedisService {
   }
 
   static lpush(key: string, value: string) {
-    return this.client!.lPush(key, value);
+    return this.op().lPush(key, value);
   }
 
   static lrange(key: string, start: number, stop: number) {
-    return this.client!.lRange(key, start, stop);
+    return this.op().lRange(key, start, stop);
   }
 }
